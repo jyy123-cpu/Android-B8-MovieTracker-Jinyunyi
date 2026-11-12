@@ -1,15 +1,19 @@
 package com.example.myapplication
 
 import android.app.Application
+import com.example.myapplication.core.AppContainer
 
 /**
  * 应用入口类。
- * 后续在这里初始化 AppContainer（数据库、网络、仓库的手动依赖容器）。
+ * 初始化 AppContainer，界面可通过 (application as MovieTrackerApplication).container 访问仓库。
  */
 class MovieTrackerApplication : Application() {
 
+    lateinit var container: AppContainer
+        private set
+
     override fun onCreate() {
         super.onCreate()
-        // 依赖容器将在数据层开发阶段初始化
+        container = AppContainer(this)
     }
 }
