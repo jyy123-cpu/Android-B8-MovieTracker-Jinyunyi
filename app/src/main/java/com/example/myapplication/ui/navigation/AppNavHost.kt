@@ -17,7 +17,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.compose.ui.Modifier
 import com.example.myapplication.ui.detail.DetailScreen
-import com.example.myapplication.ui.discover.DiscoverScreen
+import com.example.myapplication.ui.discover.DiscoverRoute
 import com.example.myapplication.ui.reminder.ReminderScreen
 import com.example.myapplication.ui.search.SearchScreen
 import com.example.myapplication.ui.watchlist.WatchlistScreen
@@ -64,7 +64,11 @@ fun AppNavHost() {
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(Routes.DISCOVER) {
-                DiscoverScreen()
+                DiscoverRoute(
+                    onMovieClick = { movieId ->
+                        navController.navigate(Routes.detail(movieId))
+                    }
+                )
             }
             composable(Routes.SEARCH) {
                 SearchScreen()
