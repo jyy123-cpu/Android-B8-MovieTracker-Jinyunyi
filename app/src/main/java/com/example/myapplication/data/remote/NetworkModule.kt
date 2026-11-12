@@ -1,6 +1,7 @@
 package com.example.myapplication.data.remote
 
 import com.example.myapplication.BuildConfig
+import com.example.myapplication.core.DoHDns
 import com.example.myapplication.data.remote.api.TmdbApiService
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
@@ -32,6 +33,7 @@ object NetworkModule {
         }
 
         val okHttpClient = OkHttpClient.Builder()
+            .dns(DoHDns()) // 用 DoH 加密解析，绕过系统 DNS 污染
             .addInterceptor(authInterceptor)
             .addInterceptor(loggingInterceptor)
             .connectTimeout(15, TimeUnit.SECONDS)
