@@ -19,7 +19,7 @@ import androidx.compose.ui.Modifier
 import com.example.myapplication.ui.detail.DetailRoute
 import com.example.myapplication.ui.discover.DiscoverRoute
 import com.example.myapplication.ui.reminder.ReminderScreen
-import com.example.myapplication.ui.search.SearchScreen
+import com.example.myapplication.ui.search.SearchRoute
 import com.example.myapplication.ui.watchlist.WatchlistRoute
 
 /**
@@ -71,7 +71,11 @@ fun AppNavHost() {
                 )
             }
             composable(Routes.SEARCH) {
-                SearchScreen()
+                SearchRoute(
+                    onMovieClick = { movieId ->
+                        navController.navigate(Routes.detail(movieId))
+                    }
+                )
             }
             composable(Routes.WATCHLIST) {
                 WatchlistRoute(
