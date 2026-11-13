@@ -25,9 +25,13 @@ interface TmdbApiService {
         @Query("page") page: Int = 1
     ): MovieResponseDto
 
-    /** 电影详情 */
+    /**
+     * 电影详情。
+     * @param language 语言代码，如 zh-CN 取中文；为 null 时使用 TMDb 默认英文
+     */
     @GET("movie/{movie_id}")
     suspend fun getMovieDetail(
-        @Path("movie_id") movieId: Int
+        @Path("movie_id") movieId: Int,
+        @Query("language") language: String? = null
     ): MovieDetailDto
 }

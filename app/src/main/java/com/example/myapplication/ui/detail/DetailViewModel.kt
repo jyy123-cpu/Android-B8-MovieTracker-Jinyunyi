@@ -36,10 +36,16 @@ class DetailViewModel(
         viewModelScope.launch {
             repository.getMovieDetail(movieId)
                 .onSuccess { detail ->
+                    // 再请求一次中文详情，只取剧情简介；失败或无翻译时为 null，不影响主流程
+                    val overviewZh = repository.getMovieDetail(movieId, LANGUAGE_ZH)
+                        .getOrNull()
+                        ?.overview
+                        ?.ifBlank { null }
                     // 详情拿到后，持续监听本地看单记录；加入/改状态/打分都会自动刷新界面
                     repository.observeMovieById(movieId).collect { savedMovie ->
                         _uiState.value = DetailUiState.Success(
                             detail = detail,
+                            overviewZh = overviewZh,
                             savedMovie = savedMovie
                         )
                     }
@@ -78,6 +84,9 @@ class DetailViewModel(
     }
 
     companion object {
+        /** TMDb 简体中文语言代码 */
+        private const val LANGUAGE_ZH = "zh-CN"
+
         /** 手动注入电影 id 和仓库的工厂 */
         fun provideFactory(
             movieId: Int,

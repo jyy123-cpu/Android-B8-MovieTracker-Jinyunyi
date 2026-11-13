@@ -206,15 +206,28 @@ private fun DetailContent(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // 剧情简介
+            // 剧情简介（中英双文）
             Text(
                 text = "剧情简介",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             )
             Spacer(modifier = Modifier.height(8.dp))
+            // 英文原文
             Text(
                 text = detail.overview?.ifBlank { "暂无简介" } ?: "暂无简介",
+                style = MaterialTheme.typography.bodyMedium
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            // 中文翻译
+            Text(
+                text = "中文简介",
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(
+                text = state.overviewZh?.ifBlank { null } ?: "暂无中文翻译",
                 style = MaterialTheme.typography.bodyMedium
             )
 

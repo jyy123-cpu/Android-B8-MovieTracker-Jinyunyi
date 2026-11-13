@@ -26,8 +26,11 @@ class MovieRepository(
         apiService.searchMovies(query, page)
     }
 
-    suspend fun getMovieDetail(movieId: Int): Result<MovieDetailDto> = safeApiCall {
-        apiService.getMovieDetail(movieId)
+    suspend fun getMovieDetail(
+        movieId: Int,
+        language: String? = null
+    ): Result<MovieDetailDto> = safeApiCall {
+        apiService.getMovieDetail(movieId, language)
     }
 
     // ---------- 本地看单 ----------

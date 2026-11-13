@@ -16,11 +16,13 @@ sealed interface DetailUiState {
 
     /**
      * 加载成功。
-     * @param detail 网络拿到的电影详情
+     * @param detail 网络拿到的电影详情（英文原文）
+     * @param overviewZh 中文剧情简介；没有翻译或请求失败时为 null
      * @param savedMovie 本地看单记录；为 null 表示还没加入看单
      */
     data class Success(
         val detail: MovieDetailDto,
+        val overviewZh: String?,
         val savedMovie: MovieEntity?
     ) : DetailUiState
 }
