@@ -62,8 +62,8 @@ class ReminderViewModel(
             val movie = repository.getMovieById(movieId) ?: return@launch
             Notifications.showReleaseNotification(
                 context = appContext,
-                // 加偏移避免和该电影的正式提醒撞 id
-                notificationId = movie.id + TEST_ID_OFFSET,
+                // 通知 id 统一用电影 id，和正式提醒是同一条，不会出现 id 错位
+                movieId = movie.id,
                 title = movie.title,
                 content = "这是一条手动测试通知，用于确认提醒功能正常"
             )
@@ -101,9 +101,6 @@ class ReminderViewModel(
     companion object {
         // 已上映影片的快速演示延迟：10 秒
         private const val QUICK_TEST_DELAY_MS = 10_000L
-
-        // 测试通知 id 偏移
-        private const val TEST_ID_OFFSET = 100_000
 
         /** 手动注入仓库和应用 Context 的工厂 */
         fun provideFactory(

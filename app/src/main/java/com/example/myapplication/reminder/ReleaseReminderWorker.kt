@@ -38,7 +38,7 @@ class ReleaseReminderWorker(
         // 3. 弹出通知；通知 id 用电影 id，保证同一部电影不重复堆叠
         Notifications.showReleaseNotification(
             context = applicationContext,
-            notificationId = movie.id,
+            movieId = movie.id,
             title = movie.title,
             content = "《${movie.title}》即将上映，点通知查看详情并安排观影"
         )

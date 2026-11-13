@@ -21,24 +21,26 @@ object Notifications {
      */
     fun showReleaseNotification(
         context: Context,
-        notificationId: Int,
+        movieId: Int,
         title: String,
         content: String
     ) {
-        val notification = buildReleaseNotification(context, title, content)
+        // 通知 id 直接用电影 id，同一部电影始终只有一条通知，天然防堆叠
+        val notification = buildReleaseNotification(context, movieId, title, content)
         val manager = context.getSystemService(NotificationManager::class.java)
-        manager.notify(notificationId, notification)
+        manager.notify(movieId, notification)
     }
 
     /**
-     * 构建通知。通知内的操作按钮在后续「通知内直接操作」阶段再追加。
+     * 构建通知，包含点击打开 App 和两个通知内直接操作按钮。
      */
     private fun buildReleaseNotification(
         context: Context,
+        movieId: Int,
         title: String,
         content: String
     ): Notification {
-        // 点击通知打开主界面
+        // 点击通知主体打开主界面
         val openIntent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
         }
@@ -46,7 +48,6 @@ object Notifications {
             context,
             0,
             openIntent,
-            // M（API 23）起必须显式声明可变/不可变，这里只打开界面，用不可变
             PendingIntent.FLAG_IMMUTABLE
         )
 
@@ -54,11 +55,21 @@ object Notifications {
             .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle(title)
             .setContentText(content)
-            // 长文本展开样式，避免内容被截断
             .setStyle(NotificationCompat.BigTextStyle().bigText(content))
             .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setAutoCancel(true) // 点击后自动消失
+            .setAutoCancel(true)
             .setContentIntent(contentPendingIntent)
+            // 通知内直接操作：不打开 App 就能标记看过或取消提醒
+            .addAction(
+                R.drawable.ic_notification,
+                "标记看过",
+                ReminderActionReceiver.markWatchedPendingIntent(context, movieId)
+            )
+            .addAction(
+                R.drawable.ic_notification,
+                "取消提醒",
+                ReminderActionReceiver.cancelReminderPendingIntent(context, movieId)
+            )
             .build()
     }
 }
