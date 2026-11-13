@@ -20,7 +20,7 @@ import com.example.myapplication.ui.detail.DetailRoute
 import com.example.myapplication.ui.discover.DiscoverRoute
 import com.example.myapplication.ui.reminder.ReminderScreen
 import com.example.myapplication.ui.search.SearchScreen
-import com.example.myapplication.ui.watchlist.WatchlistScreen
+import com.example.myapplication.ui.watchlist.WatchlistRoute
 
 /**
  * 应用总导航：底部四个一级入口 + 二级详情页。
@@ -74,7 +74,11 @@ fun AppNavHost() {
                 SearchScreen()
             }
             composable(Routes.WATCHLIST) {
-                WatchlistScreen()
+                WatchlistRoute(
+                    onMovieClick = { movieId ->
+                        navController.navigate(Routes.detail(movieId))
+                    }
+                )
             }
             composable(Routes.REMINDER) {
                 ReminderScreen()
