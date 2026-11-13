@@ -18,7 +18,7 @@ import androidx.navigation.navArgument
 import androidx.compose.ui.Modifier
 import com.example.myapplication.ui.detail.DetailRoute
 import com.example.myapplication.ui.discover.DiscoverRoute
-import com.example.myapplication.ui.reminder.ReminderScreen
+import com.example.myapplication.ui.reminder.ReminderRoute
 import com.example.myapplication.ui.search.SearchRoute
 import com.example.myapplication.ui.watchlist.WatchlistRoute
 
@@ -85,7 +85,7 @@ fun AppNavHost() {
                 )
             }
             composable(Routes.REMINDER) {
-                ReminderScreen()
+                ReminderRoute()
             }
             composable(
                 route = Routes.DETAIL,
