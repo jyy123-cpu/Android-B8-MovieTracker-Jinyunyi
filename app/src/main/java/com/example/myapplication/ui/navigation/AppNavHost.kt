@@ -16,7 +16,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.compose.ui.Modifier
-import com.example.myapplication.ui.detail.DetailScreen
+import com.example.myapplication.ui.detail.DetailRoute
 import com.example.myapplication.ui.discover.DiscoverRoute
 import com.example.myapplication.ui.reminder.ReminderScreen
 import com.example.myapplication.ui.search.SearchScreen
@@ -88,7 +88,10 @@ fun AppNavHost() {
                 )
             ) { entry ->
                 val movieId = entry.arguments?.getInt(Routes.DETAIL_ARG_MOVIE_ID) ?: 0
-                DetailScreen(movieId = movieId)
+                DetailRoute(
+                    movieId = movieId,
+                    onBack = { navController.popBackStack() }
+                )
             }
         }
     }
