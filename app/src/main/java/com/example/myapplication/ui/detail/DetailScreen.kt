@@ -1,6 +1,8 @@
 package com.example.myapplication.ui.detail
 
 import android.content.ActivityNotFoundException
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -25,6 +27,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
@@ -35,10 +38,12 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -111,17 +116,19 @@ fun DetailScreen(
  *
  * 优先指定浏览器：YouTube 等应用也会注册 https 链接，
  * 若直接 startActivity 会被它们接管，所以这里主动挑一个浏览器。
+ * 带上 application_id，让浏览器复用同一个标签页，避免反复点击堆出一堆页面。
  */
 private fun openTrailer(context: Context, videoKey: String) {
     val intent = Intent(
         Intent.ACTION_VIEW,
-        Uri.parse("https://www.youtube.com/watch?v=$videoKey")
+        Uri.parse(trailerUrl(videoKey))
     ).addCategory(Intent.CATEGORY_BROWSABLE)
 
     // 找到浏览器就锁定它，找不到则退回系统默认处理（系统会弹出应用选择）
     findBrowserPackage(context)?.let { browserPackage ->
         intent.setPackage(browserPackage)
     }
+    intent.putExtra("com.android.browser.application_id", context.packageName)
 
     try {
         context.startActivity(intent)
@@ -135,6 +142,16 @@ private fun openTrailer(context: Context, videoKey: String) {
         // 设备上没有能打开网页的应用时给出提示，避免直接崩溃
         Toast.makeText(context, "没有找到可打开链接的应用", Toast.LENGTH_SHORT).show()
     }
+}
+
+/** 预告片的跳转地址，集中在一处，复制与打开都用它 */
+private fun trailerUrl(videoKey: String) = "https://www.youtube.com/watch?v=$videoKey"
+
+/** 把预告片链接复制到剪贴板，方便在能访问 YouTube 的设备上打开 */
+private fun copyTrailerLink(context: Context, videoKey: String) {
+    val clipboard = context.getSystemService(ClipboardManager::class.java)
+    clipboard?.setPrimaryClip(ClipData.newPlainText("预告片链接", trailerUrl(videoKey)))
+    Toast.makeText(context, "预告片链接已复制", Toast.LENGTH_SHORT).show()
 }
 
 /** 常见浏览器的包名关键字，用于从 https 链接的处理者里认出浏览器 */
@@ -253,12 +270,13 @@ private fun DetailContent(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // 看预告：跳转到浏览器 / YouTube 打开预告片
+            // 看预告：先弹确认框，再决定复制链接还是跳浏览器
             // 本应用只做观影管理与元数据展示，不承载影片播放
             val trailerKey = state.trailerKey
             if (trailerKey != null) {
                 val context = LocalContext.current
-                OutlinedButton(onClick = { openTrailer(context, trailerKey) }) {
+                var showTrailerDialog by remember { mutableStateOf(false) }
+                OutlinedButton(onClick = { showTrailerDialog = true }) {
                     Icon(
                         imageVector = Icons.Filled.PlayArrow,
                         contentDescription = null
@@ -267,6 +285,41 @@ private fun DetailContent(
                     Text(text = "看预告")
                 }
                 Spacer(modifier = Modifier.height(16.dp))
+
+                if (showTrailerDialog) {
+                    AlertDialog(
+                        onDismissRequest = { showTrailerDialog = false },
+                        title = { Text(text = "看预告") },
+                        text = {
+                            Text(
+                                text = "预告片将在系统浏览器中打开。" +
+                                    "当前网络无法访问 YouTube 时页面会加载不出来，" +
+                                    "可以先把链接复制下来，换到能访问的网络再看。"
+                            )
+                        },
+                        confirmButton = {
+                            TextButton(onClick = {
+                                showTrailerDialog = false
+                                openTrailer(context, trailerKey)
+                            }) {
+                                Text(text = "打开浏览器")
+                            }
+                        },
+                        dismissButton = {
+                            Row {
+                                TextButton(onClick = {
+                                    showTrailerDialog = false
+                                    copyTrailerLink(context, trailerKey)
+                                }) {
+                                    Text(text = "复制链接")
+                                }
+                                TextButton(onClick = { showTrailerDialog = false }) {
+                                    Text(text = "取消")
+                                }
+                            }
+                        }
+                    )
+                }
             }
 
             // 类型标签，自动换行
