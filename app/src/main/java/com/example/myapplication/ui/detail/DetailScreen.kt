@@ -125,6 +125,12 @@ private fun openTrailer(context: Context, videoKey: String) {
 
     try {
         context.startActivity(intent)
+        // 跳转成功后提示一句：告知用户视频在浏览器里打开，且需要能访问 YouTube 的网络
+        Toast.makeText(
+            context,
+            "已在浏览器打开预告片（需可访问 YouTube 的网络）",
+            Toast.LENGTH_LONG
+        ).show()
     } catch (e: ActivityNotFoundException) {
         // 设备上没有能打开网页的应用时给出提示，避免直接崩溃
         Toast.makeText(context, "没有找到可打开链接的应用", Toast.LENGTH_SHORT).show()
