@@ -19,10 +19,12 @@ sealed interface DetailUiState {
      * @param detail 网络拿到的电影详情（英文原文）
      * @param overviewZh 中文剧情简介；没有翻译或请求失败时为 null
      * @param savedMovie 本地看单记录；为 null 表示还没加入看单
+     * @param trailerKey 预告片的 YouTube key；没有可用预告片时为 null
      */
     data class Success(
         val detail: MovieDetailDto,
         val overviewZh: String?,
-        val savedMovie: MovieEntity?
+        val savedMovie: MovieEntity?,
+        val trailerKey: String? = null
     ) : DetailUiState
 }

@@ -12,6 +12,14 @@
     <!-- 开机后重新注册提醒（WorkManager 本身也会持久化任务，这里用于保险） -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
+    <!-- Android 11 起的包可见性声明：允许本应用查询能打开网页链接的应用，用于「看预告」跳转浏览器 -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="https" />
+        </intent>
+    </queries>
+
     <application
         android:name=".MovieTrackerApplication"
         android:allowBackup="true"

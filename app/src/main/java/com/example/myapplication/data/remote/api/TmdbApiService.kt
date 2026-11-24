@@ -2,6 +2,7 @@ package com.example.myapplication.data.remote.api
 
 import com.example.myapplication.data.remote.dto.MovieDetailDto
 import com.example.myapplication.data.remote.dto.MovieResponseDto
+import com.example.myapplication.data.remote.dto.MovieVideosDto
 import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
@@ -34,4 +35,13 @@ interface TmdbApiService {
         @Path("movie_id") movieId: Int,
         @Query("language") language: String? = null
     ): MovieDetailDto
+
+    /**
+     * 电影关联视频（预告片、花絮等）。
+     * TMDb 只返回视频平台标识，不托管视频文件本身。
+     */
+    @GET("movie/{movie_id}/videos")
+    suspend fun getMovieVideos(
+        @Path("movie_id") movieId: Int
+    ): MovieVideosDto
 }

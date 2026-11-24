@@ -7,6 +7,7 @@ import com.example.myapplication.data.local.entity.WatchStatus
 import com.example.myapplication.data.remote.api.TmdbApiService
 import com.example.myapplication.data.remote.dto.MovieDetailDto
 import com.example.myapplication.data.remote.dto.MovieResponseDto
+import com.example.myapplication.data.remote.dto.TrailerPicker
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -32,6 +33,15 @@ class MovieRepository(
     ): Result<MovieDetailDto> = safeApiCall {
         apiService.getMovieDetail(movieId, language)
     }
+
+    /**
+     * 取预告片的 YouTube key；没有可用预告片或请求失败时返回 null。
+     * 失败不抛出、不阻塞详情页，界面上只表现为不显示「看预告」按钮。
+     */
+    suspend fun getTrailerKey(movieId: Int): String? =
+        safeApiCall { apiService.getMovieVideos(movieId) }
+            .getOrNull()
+            ?.let { TrailerPicker.pick(it.results) }
 
     // ---------- 本地看单 ----------
 

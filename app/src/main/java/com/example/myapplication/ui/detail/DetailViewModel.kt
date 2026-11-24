@@ -41,12 +41,15 @@ class DetailViewModel(
                         .getOrNull()
                         ?.overview
                         ?.ifBlank { null }
+                    // 预告片 key：没有可用预告片时返回 null，按钮就不显示
+                    val trailerKey = repository.getTrailerKey(movieId)
                     // 详情拿到后，持续监听本地看单记录；加入/改状态/打分都会自动刷新界面
                     repository.observeMovieById(movieId).collect { savedMovie ->
                         _uiState.value = DetailUiState.Success(
                             detail = detail,
                             overviewZh = overviewZh,
-                            savedMovie = savedMovie
+                            savedMovie = savedMovie,
+                            trailerKey = trailerKey
                         )
                     }
                 }

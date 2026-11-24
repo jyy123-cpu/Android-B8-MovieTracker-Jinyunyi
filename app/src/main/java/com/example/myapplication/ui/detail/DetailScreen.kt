@@ -1,5 +1,11 @@
 package com.example.myapplication.ui.detail
 
+import android.content.ActivityNotFoundException
+import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,12 +24,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -94,6 +102,57 @@ fun DetailScreen(
                 onRate = viewModel::rate
             )
         }
+    }
+}
+
+/**
+ * 用系统浏览器打开预告片。
+ * 只做外链跳转，不下载、不内嵌播放。
+ *
+ * 优先指定浏览器：YouTube 等应用也会注册 https 链接，
+ * 若直接 startActivity 会被它们接管，所以这里主动挑一个浏览器。
+ */
+private fun openTrailer(context: Context, videoKey: String) {
+    val intent = Intent(
+        Intent.ACTION_VIEW,
+        Uri.parse("https://www.youtube.com/watch?v=$videoKey")
+    ).addCategory(Intent.CATEGORY_BROWSABLE)
+
+    // 找到浏览器就锁定它，找不到则退回系统默认处理（系统会弹出应用选择）
+    findBrowserPackage(context)?.let { browserPackage ->
+        intent.setPackage(browserPackage)
+    }
+
+    try {
+        context.startActivity(intent)
+    } catch (e: ActivityNotFoundException) {
+        // 设备上没有能打开网页的应用时给出提示，避免直接崩溃
+        Toast.makeText(context, "没有找到可打开链接的应用", Toast.LENGTH_SHORT).show()
+    }
+}
+
+/** 常见浏览器的包名关键字，用于从 https 链接的处理者里认出浏览器 */
+private val BROWSER_KEYWORDS = listOf(
+    "chrome", "browser", "firefox", "edge", "emmx", "mtt", "quark", "ucmobile", "baidu", "sogou"
+)
+
+/**
+ * 在系统里找一个能打开网页的浏览器包名。
+ * 先用一个普通 http 地址试探有哪些应用能处理网页链接，排除视频类应用后优先匹配浏览器关键字。
+ */
+private fun findBrowserPackage(context: Context): String? {
+    val probe = Intent(
+        Intent.ACTION_VIEW,
+        Uri.parse("http://www.example.com")
+    ).addCategory(Intent.CATEGORY_BROWSABLE)
+    @Suppress("DEPRECATION")
+    val handlers = context.packageManager
+        .queryIntentActivities(probe, PackageManager.MATCH_DEFAULT_ONLY)
+        .map { it.activityInfo.packageName }
+        .filterNot { it.contains("youtube", ignoreCase = true) }
+
+    return handlers.firstOrNull { packageName ->
+        BROWSER_KEYWORDS.any { packageName.contains(it, ignoreCase = true) }
     }
 }
 
@@ -187,6 +246,22 @@ private fun DetailContent(
             }
 
             Spacer(modifier = Modifier.height(16.dp))
+
+            // 看预告：跳转到浏览器 / YouTube 打开预告片
+            // 本应用只做观影管理与元数据展示，不承载影片播放
+            val trailerKey = state.trailerKey
+            if (trailerKey != null) {
+                val context = LocalContext.current
+                OutlinedButton(onClick = { openTrailer(context, trailerKey) }) {
+                    Icon(
+                        imageVector = Icons.Filled.PlayArrow,
+                        contentDescription = null
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(text = "看预告")
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+            }
 
             // 类型标签，自动换行
             Text(
